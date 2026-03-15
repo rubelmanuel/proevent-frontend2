@@ -305,6 +305,32 @@
 .signup-text a { color: #fe8301; font-weight: 600; text-decoration: none; }
 .signup-text a:hover { text-decoration: underline; }
 
+/* ── Google Login ── */
+.google-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.google-divider-line {
+  flex: 1; height: 1px; background: #e5e7eb;
+}
+
+.google-divider span {
+  font-size: 11px;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.google-btn-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 /* ── Responsive ── */
 @media (max-width: 480px) {
   .login-page { padding: 16px; }

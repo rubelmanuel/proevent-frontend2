@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import './../css/Login.css';
 import viewIcon from "./../img/view.png";
 import hideIcon from "./../img/hide.png";
@@ -18,6 +18,54 @@ function Login({ onLogin, onBackClick, onForgotPasswordClick }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const googleButtonRef = useRef(null);
+
+  const handleGoogleCallback = async (response) => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("http://localhost:8080/login-google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onLogin(data.usuario);
+      } else {
+        setError(data.mensaje || "Error al iniciar sesión con Google.");
+      }
+    } catch (err) {
+      setError("No se pudo conectar al servidor. Verifique que el backend esté activo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: "426335318098-v39ood0lcapc22lgoq3lons62hbf507m.apps.googleusercontent.com",
+          callback: handleGoogleCallback,
+        });
+        window.google.accounts.id.renderButton(
+          googleButtonRef.current,
+          { theme: "outline", size: "large", width: "100%", text: "continue_with" }
+        );
+      }
+    };
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -134,6 +182,14 @@ function Login({ onLogin, onBackClick, onForgotPasswordClick }) {
                 {loading ? "Verificando..." : "Iniciar Sesión"}
               </button>
             </form>
+
+            <div className="google-divider">
+              <div className="google-divider-line"></div>
+              <span>o continuar con</span>
+              <div className="google-divider-line"></div>
+            </div>
+
+            <div ref={googleButtonRef} className="google-btn-container"></div>
 
             <p className="signup-text">
               ¿Necesitas acceso?&nbsp;
