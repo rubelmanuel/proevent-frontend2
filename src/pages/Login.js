@@ -12,7 +12,7 @@ const RIGHT_FEATURES = [
   { icon: "🔒", text: "Acceso seguro con credenciales UAPA" },
 ];
 
-function Login({ onLogin, onBackClick }) {
+function Login({ onLogin, onBackClick, onForgotPasswordClick }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -118,7 +118,7 @@ function Login({ onLogin, onBackClick }) {
               </div>
 
               <div className="login-helpers">
-                <button type="button" className="login-forgot" onClick={(e) => e.preventDefault()}>
+                <button type="button" className="login-forgot" onClick={onForgotPasswordClick}>
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>

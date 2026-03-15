@@ -4,7 +4,7 @@ import './../css/Dashboard.css';
 
 const API = "http://localhost:8080";
 
-function DashboardHome() {
+function DashboardHome({ usuario }) {
   const [sortOrder, setSortOrder] = useState("desc");
   const [departmentFilter, setDepartmentFilter] = useState("Todos");
   const [statusFilter, setStatusFilter] = useState("Todos");
@@ -66,6 +66,23 @@ function DashboardHome() {
       });
       if (res.ok) {
         cargarEventos();
+      } else {
+        alert("Error al cambiar el estado.");
+      }
+    } catch {
+      alert("No se pudo conectar al servidor.");
+    }
+  };
+
+  const handleCambiarEstadoAV = async (id_servicio, nuevoEstado) => {
+    try {
+      const res = await fetch(`${API}/audiovisual/${id_servicio}/estado`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: nuevoEstado })
+      });
+      if (res.ok) {
+        cargarAudiovisuales();
       } else {
         alert("Error al cambiar el estado.");
       }
@@ -281,6 +298,7 @@ function DashboardHome() {
                   <th>FECHA EVENTO</th>
                   <th>UBICACIÓN</th>
                   <th>ESTADO</th>
+                  {(usuario?.rol === "Administrador" || usuario?.rol === "Audiovisual") && <th>ACCIONES</th>}
                 </tr>
               </thead>
               <tbody>
@@ -302,6 +320,21 @@ function DashboardHome() {
                         {av.estado_av || "Pendiente"}
                       </span>
                     </td>
+                    {(usuario?.rol === "Administrador" || usuario?.rol === "Audiovisual") && (
+                      <td>
+                        <select
+                          value={av.estado_av || "Pendiente"}
+                          onChange={(e) => handleCambiarEstadoAV(av.id_servicio, e.target.value)}
+                          style={{ fontSize: "12px", padding: "4px 6px", borderRadius: "4px", border: "1px solid #cbd5e1", cursor: "pointer" }}
+                        >
+                          <option value="Pendiente">Pendiente</option>
+                          <option value="En revisión">En revisión</option>
+                          <option value="Aprobado">Aprobado</option>
+                          <option value="Rechazado">Rechazado</option>
+                          <option value="Completado">Completado</option>
+                        </select>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
