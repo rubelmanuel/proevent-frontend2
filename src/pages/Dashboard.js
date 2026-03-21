@@ -19,7 +19,8 @@ import InventarioAudiovisual from "./InventarioAudiovisual";
 import AdminEvento from "./AdminEvento";
 import Calendario from "./Calendario";
 import GestionSolicitudesAV from "./GestionSolicitudesAV";
-import { FiSliders, FiList, FiCalendar, FiMonitor, FiBox } from "react-icons/fi";
+import PoaAdmin from "./PoaAdmin";
+import { FiSliders, FiList, FiCalendar, FiMonitor, FiBox, FiDollarSign } from "react-icons/fi";
 
 function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
     const [activeTab, setActiveTab] = useState("Dashboard");
@@ -60,6 +61,8 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                 return <Calendario usuario={usuario} />;
             case "GestionSolicitudes":
                 return <GestionSolicitudesAV usuario={usuario} />;
+            case "PoaAdmin":
+                return <PoaAdmin usuario={usuario} />;
             default:
                 return <DashboardHome usuario={usuario} />;
         }
@@ -91,6 +94,8 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                 return "Calendario de Eventos";
             case "GestionSolicitudes":
                 return "Gestión de Solicitudes Audiovisuales";
+            case "PoaAdmin":
+                return "Plan Operativo Anual";
             default:
                 return activeTab;
         }
@@ -147,6 +152,12 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                             <li className={activeTab === "Bitacora" ? "active" : ""} onClick={() => setActiveTab("Bitacora")}>
                                 <FiUsers className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
                                 Actividad de usuario
+                            </li>
+                        )}
+                        {(usuario?.rol === "Administrador" || usuario?.rol === "Administrador V-A-F") && (
+                            <li className={activeTab === "PoaAdmin" ? "active" : ""} onClick={() => setActiveTab("PoaAdmin")}>
+                                <FiDollarSign className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
+                                Presupuesto POA
                             </li>
                         )}
                         {(usuario?.rol === "Administrador" || usuario?.rol === "Administrador de Audiovisual") && (
