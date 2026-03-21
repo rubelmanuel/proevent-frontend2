@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiAlertTriangle, FiArrowLeft, FiArrowRight, FiCheckCircle, FiMonitor } from "react-icons/fi";
 import InformacionGeneral from "./InformacionGeneral";
 import ModalidadLugar from "./ModalidadLugar";
@@ -8,7 +8,7 @@ import AudiovisualMiniForm from "./AudiovisualMiniForm";
 
 const API = "http://localhost:8080";
 
-export default function NuevaSolicitudEvento({ activeSection, setActiveSection, usuario }) {
+export default function NuevaSolicitudEvento({ activeSection, setActiveSection, usuario, editingEvent, setEditingEvent }) {
   const [data, setData] = useState({
     titulo: "",
     departamento: "",
@@ -30,13 +30,53 @@ export default function NuevaSolicitudEvento({ activeSection, setActiveSection, 
     observaciones: ""
   });
 
+  useEffect(() => {
+    if (editingEvent) {
+      setData({
+        id_evento: editingEvent.id_evento,
+        titulo: editingEvent.nombre || "",
+        id_dependencia: editingEvent.id_dependencia || "",
+        tipo: editingEvent.tipo_evento || "",
+        otroTipo: "",
+        inicio: editingEvent.fecha_inicio ? editingEvent.fecha_inicio.substring(0, 10) : "",
+        fin: editingEvent.fecha_fin ? editingEvent.fecha_fin.substring(0, 10) : "",
+        horaInicio: editingEvent.hora_inicio || "",
+        horaFin: editingEvent.hora_fin || "",
+        modalidad: editingEvent.modalidad || "Presencial",
+        id_recinto: editingEvent.id_recinto || "",
+        asistentes: editingEvent.cantidad_asistentes || "",
+        items: editingEvent.detalles_corporativos ? editingEvent.detalles_corporativos.split(', ') : [],
+        catering: editingEvent.alimentos ? editingEvent.alimentos.split(', ') : [],
+        presupuesto: editingEvent.monto_poa || "",
+        moneda: editingEvent.moneda || "DOP",
+        observaciones: editingEvent.observaciones || ""
+      });
+    }
+  }, [editingEvent]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [exito, setExito] = useState("");
+  const [needsAV, setNeedsAV] = useState(null);
 
-  // Estados para el flujo condicional de Audiovisuales
-  const [needsAV, setNeedsAV] = useState(null); // null = no preguntado, true = si, false = no
   const [avData, setAvData] = useState({ equipos: [], observaciones: "" });
+
+  const [poaFiscal, setPoaFiscal] = useState(null);
+
+  useEffect(() => {
+    const fetchPoa = async () => {
+      try {
+        const res = await fetch(`${API}/poa`);
+        const dataJson = await res.json();
+        if (dataJson.poas && dataJson.poas.length > 0) {
+          setPoaFiscal(dataJson.poas[0]);
+        }
+      } catch (e) {
+        console.error("Error fetching POA for validation:", e);
+      }
+    };
+    fetchPoa();
+  }, []);
 
   const validarSeccion = (seccion) => {
     if (seccion === "Información General") {
@@ -48,6 +88,36 @@ export default function NuevaSolicitudEvento({ activeSection, setActiveSection, 
       if (!data.fin) return "La fecha de finalización es obligatoria.";
       if (!data.horaFin) return "La hora de cierre es obligatoria.";
       if (data.fin < data.inicio) return "La fecha de fin no puede ser antes de la fecha de inicio.";
+
+      // Validar Horario de Oficina (08:00 AM - 06:00 PM)
+      const hI = parseInt(data.horaInicio.split(':')[0], 10);
+      const mI = parseInt(data.horaInicio.split(':')[1], 10);
+      const hF = parseInt(data.horaFin.split(':')[0], 10);
+      const mF = parseInt(data.horaFin.split(':')[1], 10);
+
+      if (hI < 8 || hI >= 18) {
+        if (!(hI === 18 && mI === 0)) return "La hora de inicio debe estar entre las 08:00 AM y 06:00 PM.";
+      }
+      if (hF < 8 || hF > 18 || (hF === 18 && mF > 0)) {
+        return "La hora de finalización debe estar entre las 08:00 AM y 06:00 PM.";
+      }
+
+      // Validar contra Año Fiscal POA
+      if (poaFiscal) {
+        const pInicio = poaFiscal.fecha_inicio.substring(0, 10);
+        const pFin = poaFiscal.fecha_fin.substring(0, 10);
+        
+        if (data.inicio < pInicio || data.inicio > pFin || data.fin < pInicio || data.fin > pFin) {
+          return `La fecha seleccionada está fuera del año fiscal activo (${pInicio} al ${pFin}).`;
+        }
+        
+        // Validar que no sea un año pasado (comparando el inicio del POA con el año actual si se requiere, 
+        // pero la instrucción dice "no se agrege fecha de años fiscales pasados", lo cual se cumple si solo validamos contra el POA ACTIVO)
+        const hoy = new Date().toISOString().substring(0, 10);
+        if (data.inicio < hoy) {
+            return "No se permite registrar eventos en fechas pasadas.";
+        }
+      }
     }
     if (seccion === "Modalidad y Lugar") {
       if (!data.modalidad) return "Debes seleccionar una modalidad.";
@@ -135,8 +205,11 @@ export default function NuevaSolicitudEvento({ activeSection, setActiveSection, 
         observaciones: data.observaciones
       };
 
-      const res = await fetch(`${API}/eventos`, {
-        method: "POST",
+      const method = data.id_evento ? "PUT" : "POST";
+      const url = data.id_evento ? `${API}/eventos/${data.id_evento}` : `${API}/eventos`;
+
+      const res = await fetch(url, {
+        method: method,
         headers: { 
           "Content-Type": "application/json",
           "x-usuario-id": usuario?.id_usuario || ""
@@ -147,9 +220,10 @@ export default function NuevaSolicitudEvento({ activeSection, setActiveSection, 
       const result = await res.json();
 
       if (!res.ok) {
-        setError(result.mensaje || "Error al enviar la solicitud.");
+        console.error("Error en enviarSolicitud:", result);
+        setError(result.mensaje || result.error || "Error al enviar la solicitud.");
       } else {
-        const id_evento = result.id_evento;
+        const id_evento = result.id_evento || data.id_evento;
         
         if (needsAV === true && avData.equipos.length > 0) {
           try {
@@ -178,7 +252,7 @@ export default function NuevaSolicitudEvento({ activeSection, setActiveSection, 
           }
         }
 
-        setExito(`Solicitud enviada con éxito. ID del evento: #EVT-${id_evento}${needsAV ? " (Incluye requerimientos de audiovisual)" : ""}`);
+        setExito(`Solicitud ${data.id_evento ? "actualizada" : "enviada"} con éxito. ID del evento: #EVT-${id_evento || data.id_evento}${needsAV ? " (Incluye requerimientos de audiovisual)" : ""}`);
         
         setData({
           titulo: "", departamento: "", id_dependencia: "", tipo: "", otroTipo: "",
@@ -188,6 +262,7 @@ export default function NuevaSolicitudEvento({ activeSection, setActiveSection, 
         });
         setNeedsAV(null);
         setAvData({ equipos: [], observaciones: "" });
+        if (setEditingEvent) setEditingEvent(null);
         setActiveSection(secciones[0]);
       }
     } catch (err) {

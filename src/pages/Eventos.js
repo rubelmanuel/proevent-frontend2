@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../css/Eventos.css';
 import NuevaSolicitudEvento from './NuevaSolicitudEvento';
 
-function Eventos({ usuario }) {
+function Eventos({ usuario, editingEvent, setEditingEvent }) {
   const [activeSection, setActiveSection] = useState("Información General");
 
   const secciones = [
@@ -35,6 +35,8 @@ function Eventos({ usuario }) {
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           usuario={usuario}
+          editingEvent={editingEvent}
+          setEditingEvent={setEditingEvent}
         />
       </main>
     </div>

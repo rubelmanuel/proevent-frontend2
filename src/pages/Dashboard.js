@@ -25,7 +25,9 @@ import { FiSliders, FiList, FiCalendar, FiMonitor, FiBox, FiDollarSign } from "r
 function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
     const [activeTab, setActiveTab] = useState("Dashboard");
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [userMenuOpen, setUserMenuOpen] = useState(false); // Keep this for the user profile dropdown
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [editingEvent, setEditingEvent] = useState(null);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -38,9 +40,17 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
     const renderContent = () => {
         switch (activeTab) {
             case "Dashboard":
-                return <DashboardHome usuario={usuario} />;
+                return <DashboardHome 
+                    usuario={usuario} 
+                    searchTerm={searchTerm} 
+                    onEditEvent={(evt) => { setEditingEvent(evt); setActiveTab("Eventos"); }} 
+                />;
             case "Eventos":
-                return <Eventos usuario={usuario} />;
+                return <Eventos 
+                    usuario={usuario} 
+                    editingEvent={editingEvent} 
+                    setEditingEvent={setEditingEvent} 
+                />;
             case "Audiovisual":
                 return <Audiovisual usuario={usuario} />;
             case "Ajustes":
@@ -62,7 +72,10 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
             case "GestionSolicitudes":
                 return <GestionSolicitudesAV usuario={usuario} />;
             case "PoaAdmin":
-                return <PoaAdmin usuario={usuario} />;
+                return <PoaAdmin 
+                    usuario={usuario} 
+                    searchTerm={searchTerm} 
+                />;
             default:
                 return <DashboardHome usuario={usuario} />;
         }
@@ -124,13 +137,13 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                             <FiCalendar className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
                             Calendario
                         </li>
-                        {usuario?.rol !== "Administrador de Audiovisual" && (
+                        {usuario?.rol !== "Administrador de Audiovisual" && usuario?.rol !== "Administrador V-A-F" && (
                             <li className={activeTab === "Eventos" ? "active" : ""} onClick={() => setActiveTab("Eventos")}>
                                 <img src={eventosIcon} alt="Eventos" className="nav-icon-img" />
                                 Solicitud de Eventos
                             </li>
                         )}
-                        {usuario?.rol !== "Solicitante" && usuario?.rol !== "Administrador de Audiovisual" && (
+                        {usuario?.rol !== "Solicitante" && usuario?.rol !== "Administrador de Audiovisual" && usuario?.rol !== "Administrador V-A-F" && (
                             <li className={activeTab === "Audiovisual" ? "active" : ""} onClick={() => setActiveTab("Audiovisual")}>
                                 <img src={audiovisualIcon} alt="Audiovisual" className="nav-icon-img" />
                                 Solicitud de Audiovisual
@@ -218,6 +231,8 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                             <input
                                 type="text"
                                 placeholder={activeTab === "Ajustes" ? "Buscar usuario..." : "Buscar eventos o IDs..."}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                     </div>

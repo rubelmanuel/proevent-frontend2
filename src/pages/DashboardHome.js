@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FiCheckCircle, FiClock, FiFileText, FiRefreshCw, FiCalendar, FiChevronLeft, FiChevronRight, FiEye } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiFileText, FiRefreshCw, FiCalendar, FiChevronLeft, FiChevronRight, FiEye, FiEdit2 } from "react-icons/fi";
 import './../css/Dashboard.css';
 
 const API = "http://localhost:8080";
 
-function DashboardHome({ usuario }) {
+function DashboardHome({ usuario, searchTerm = "", onEditEvent }) {
   const [sortOrder, setSortOrder] = useState("desc");
   const [departmentFilter, setDepartmentFilter] = useState("Todos");
   const [statusFilter, setStatusFilter] = useState("Todos");
@@ -157,6 +157,12 @@ function DashboardHome({ usuario }) {
 
   const filteredRequests = eventRequests
     .filter((req) => {
+      const matchSearch = searchTerm === "" || 
+        req.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        `#EVT-${req.id_evento}`.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (!matchSearch) return false;
+
       const matchDept = departmentFilter === "Todos" || req.dependencia === departmentFilter;
       const matchStatus = statusFilter === "Todos" || req.estado === statusFilter;
       const matchDate = !dateFilter || (req.fecha_inicio && req.fecha_inicio.startsWith(dateFilter));
@@ -263,8 +269,9 @@ function DashboardHome({ usuario }) {
                   <th>FECHA</th>
                   <th>RECINTO</th>
                   <th>ESTADO</th>
-                  {usuario?.rol !== "Solicitante" && <th>DETALLES</th>}
-                  {usuario?.rol !== "Solicitante" && <th>ACCIONES</th>}
+                  <th>ESTADO POA</th>
+                  <th>DETALLES</th>
+                  {usuario?.rol !== "Administrador V-A-F" && <th>ACCIONES</th>}
                 </tr>
               </thead>
               <tbody>
@@ -283,26 +290,37 @@ function DashboardHome({ usuario }) {
                         {req.estado || "Pendiente"}
                       </span>
                     </td>
-                    {usuario?.rol !== "Solicitante" && (
-                      <td>
-                        <button className="details-btn" onClick={() => openModal(req)}>
-                          <FiEye /> Ver
-                        </button>
-                      </td>
-                    )}
-                    {usuario?.rol !== "Solicitante" && (
-                      <td>
-                        <select
-                          value={req.estado || "Pendiente"}
-                          onChange={(e) => handleCambiarEstado(req.id_evento, e.target.value)}
-                          className="table-select"
-                        >
-                          <option value="Pendiente">Pendiente</option>
-                          <option value="Aprobado">Aprobado</option>
-                          <option value="Rechazado">Rechazado</option>
-                          <option value="Finalizado">Finalizado</option>
-                        </select>
-                      </td>
+                    <td>
+                      <span className={`status ${getStatusClass(req.estado_poa)}`}>
+                        {req.estado_poa || "Ninguno"}
+                      </span>
+                    </td>
+                    <td>
+                      <button className="details-btn" onClick={() => openModal(req)}>
+                        <FiEye /> Ver
+                      </button>
+                    </td>
+                    {usuario?.rol !== "Administrador V-A-F" && (
+                    <td>
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        {usuario?.rol === "Solicitante" ? (
+                          <button className="details-btn" style={{ background: '#f59e0b', color: 'white' }} onClick={() => onEditEvent(req)}>
+                            <FiEdit2 /> Editar
+                          </button>
+                        ) : (
+                          <select
+                            value={req.estado || "Pendiente"}
+                            onChange={(e) => handleCambiarEstado(req.id_evento, e.target.value)}
+                            className="table-select"
+                          >
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Aprobado">Aprobado</option>
+                            <option value="Rechazado">Rechazado</option>
+                            <option value="Finalizado">Finalizado</option>
+                          </select>
+                        )}
+                      </div>
+                    </td>
                     )}
                   </tr>
                 ))}
@@ -401,7 +419,7 @@ function DashboardHome({ usuario }) {
                 {(selectedRequest.monto_poa || selectedRequest.moneda) && (
                   <div className="detail-group">
                     <label>Presupuesto POA:</label>
-                    <p>{selectedRequest.monto_poa ? `${selectedRequest.monto_poa} ${selectedRequest.moneda || ''}` : "—"}</p>
+                    <p>{selectedRequest.monto_poa ? `${Number(selectedRequest.monto_poa).toLocaleString("en-US", {minimumFractionDigits: 2})} ${selectedRequest.moneda || ''}` : "—"}</p>
                   </div>
                 )}
                 {selectedRequest.detalles_corporativos && (
