@@ -99,7 +99,7 @@ export default function AdminAudiovisual({ usuario }) {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = equipos.slice(indexOfFirstItem, indexOfLastItem);
 
-  if (usuario?.rol !== "Administrador de Audiovisual") {
+  if (usuario?.rol !== "Administrador de Audiovisual" && usuario?.rol !== "Administrador") {
     return <div style={{ padding: "2rem" }}>No tienes permisos para acceder a esta sección.</div>;
   }
 

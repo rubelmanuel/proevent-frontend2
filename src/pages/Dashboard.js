@@ -12,10 +12,13 @@ import Eventos from "./Eventos";
 import Audiovisual from "./Audiovisual";
 import AjustesUsuarios from "./AjustesUsuarios";
 import Bitacora from "./Bitacora";
+import SoporteHome from "./SoporteHome";
+import Evaluacion from "./Evaluacion";
 import AdminAudiovisual from "./AdminAudiovisual";
 import InventarioAudiovisual from "./InventarioAudiovisual";
 import AdminEvento from "./AdminEvento";
 import Calendario from "./Calendario";
+import GestionSolicitudesAV from "./GestionSolicitudesAV";
 import { FiSliders, FiList, FiCalendar, FiMonitor, FiBox } from "react-icons/fi";
 
 function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
@@ -41,6 +44,10 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                 return <Audiovisual usuario={usuario} />;
             case "Ajustes":
                 return <AjustesUsuarios usuario={usuario} />;
+            case "Soporte":
+                return <SoporteHome usuario={usuario} />;
+            case "Evaluacion":
+                return <Evaluacion usuario={usuario} />;
             case "Bitacora":
                 return <Bitacora />;
             case "AdminAudiovisual":
@@ -51,6 +58,8 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                 return <AdminEvento usuario={usuario} />;
             case "Calendario":
                 return <Calendario usuario={usuario} />;
+            case "GestionSolicitudes":
+                return <GestionSolicitudesAV usuario={usuario} />;
             default:
                 return <DashboardHome usuario={usuario} />;
         }
@@ -66,6 +75,10 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                 return "Producción Audiovisual";
             case "Ajustes":
                 return "Ajustes de Sistema - Usuarios";
+            case "Soporte":
+                return "Soporte y Ayuda";
+            case "Evaluacion":
+                return "Evaluación de Servicios";
             case "Bitacora":
                 return "Actividad de Usuario";
             case "AdminAudiovisual":
@@ -76,6 +89,8 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                 return "Catálogos de Eventos";
             case "Calendario":
                 return "Calendario de Eventos";
+            case "GestionSolicitudes":
+                return "Gestión de Solicitudes Audiovisuales";
             default:
                 return activeTab;
         }
@@ -104,15 +119,29 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                             <FiCalendar className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
                             Calendario
                         </li>
-                        <li className={activeTab === "Eventos" ? "active" : ""} onClick={() => setActiveTab("Eventos")}>
-                            <img src={eventosIcon} alt="Eventos" className="nav-icon-img" />
-                            Solicitud de Eventos
-                        </li>
-                        {usuario?.rol !== "Solicitante" && (
+                        {usuario?.rol !== "Administrador de Audiovisual" && (
+                            <li className={activeTab === "Eventos" ? "active" : ""} onClick={() => setActiveTab("Eventos")}>
+                                <img src={eventosIcon} alt="Eventos" className="nav-icon-img" />
+                                Solicitud de Eventos
+                            </li>
+                        )}
+                        {usuario?.rol !== "Solicitante" && usuario?.rol !== "Administrador de Audiovisual" && (
                             <li className={activeTab === "Audiovisual" ? "active" : ""} onClick={() => setActiveTab("Audiovisual")}>
                                 <img src={audiovisualIcon} alt="Audiovisual" className="nav-icon-img" />
                                 Solicitud de Audiovisual
                             </li>
+                        )}
+                        {(usuario?.rol === "Solicitante" || usuario?.rol === "Administrador") && (
+                            <>
+                                <li className={activeTab === "Evaluacion" ? "active" : ""} onClick={() => setActiveTab("Evaluacion")}>
+                                    <FiStar className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
+                                    Evaluación
+                                </li>
+                                <li className={activeTab === "Soporte" ? "active" : ""} onClick={() => setActiveTab("Soporte")}>
+                                    <FiHeadphones className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
+                                    Soporte
+                                </li>
+                            </>
                         )}
                         {usuario?.rol === "Administrador" && (
                             <li className={activeTab === "Bitacora" ? "active" : ""} onClick={() => setActiveTab("Bitacora")}>
@@ -122,6 +151,10 @@ function Dashboard({ usuario, isLoginGoogle, onLogoutClick }) {
                         )}
                         {(usuario?.rol === "Administrador" || usuario?.rol === "Administrador de Audiovisual") && (
                             <>
+                                <li className={activeTab === "GestionSolicitudes" ? "active" : ""} onClick={() => setActiveTab("GestionSolicitudes")}>
+                                    <FiList className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
+                                    Gestión de solicitudes audiovisuales
+                                </li>
                                 <li className={activeTab === "AdminAudiovisual" ? "active" : ""} onClick={() => setActiveTab("AdminAudiovisual")}>
                                     <FiMonitor className="action-icon" style={{ fontSize: '18px', opacity: 0.9, flexShrink: 0 }} aria-hidden="true" />
                                     Catálogo Audiovisual
