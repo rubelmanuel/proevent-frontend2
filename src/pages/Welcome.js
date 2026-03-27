@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import './../css/Welcome.css';
 import uapaLogo from './../img/Logo-blanco-UAPA.png';
 
+const API = "http://localhost:8080";
+
 const FEATURES = [
   {
     icon: (
@@ -99,10 +101,32 @@ function Welcome({ isLoggedIn, onLoginClick, onLogoutClick }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [stats, setStats] = useState({ eventos: 0, audiovisual: 0, usuarios: 0 });
 
   const toggleSidebar = () => setSidebarOpen((v) => !v);
   const openHelpModal = () => { setShowHelpModal(true); setSidebarOpen(false); };
   const closeHelpModal = () => setShowHelpModal(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [resEv, resAv, resUs] = await Promise.all([
+          fetch(`${API}/eventos`),
+          fetch(`${API}/audiovisual`),
+          fetch(`${API}/usuarios`)
+        ]);
+        const [ev, av, us] = await Promise.all([resEv.json(), resAv.json(), resUs.json()]);
+        setStats({
+          eventos: Array.isArray(ev) ? ev.length : 0,
+          audiovisual: Array.isArray(av) ? av.length : 0, 
+          usuarios: Array.isArray(us) ? us.length : 0
+        });
+      } catch (err) {
+        console.error("Error fetching landing stats:", err);
+      }
+    };
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -338,6 +362,31 @@ function Welcome({ isLoggedIn, onLoginClick, onLogoutClick }) {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── STATS ── */}
+      <section id="stats" className="stats-section">
+        <div className="section-header">
+          <div className="section-tag">Impacto del Sistema</div>
+          <h2 className="section-title">Resultados que Hablan Solos</h2>
+          <p className="section-subtitle">
+            ProEvent optimiza la gestión institucional a través de datos precisos y procesos coordinados.
+          </p>
+        </div>
+        <div className="stats-container">
+          {[
+            { label: "Eventos Gestionados", value: stats.eventos, icon: "📅", color: "blue" },
+            { label: "Servicios Audiovisuales", value: stats.audiovisual, icon: "🎥", color: "orange" },
+            { label: "Usuarios Registrados", value: stats.usuarios, icon: "👥", color: "navy" },
+            { label: "Sistema Operativo", value: "100%", icon: "⚡", color: "gold" },
+          ].map((stat) => (
+            <div key={stat.label} className={`stat-box ${stat.color}`}>
+              <div className="stat-box-icon">{stat.icon}</div>
+              <div className="stat-box-value">{stat.value}</div>
+              <div className="stat-box-label">{stat.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 

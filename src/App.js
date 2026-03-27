@@ -6,10 +6,33 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
 function App() {
-  const [page, setPage] = useState("welcome");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [usuario, setUsuario] = useState(null);
+  const [page, setPage] = useState(() => {
+    return localStorage.getItem("page") || "welcome";
+  });
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem("isLoggedIn") === "true";
+  });
+  const [usuario, setUsuario] = useState(() => {
+    const savedUser = localStorage.getItem("usuario");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [resetToken, setResetToken] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem("page", page);
+  }, [page]);
+
+  useEffect(() => {
+    localStorage.setItem("isLoggedIn", isLoggedIn);
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (usuario) {
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+    } else {
+      localStorage.removeItem("usuario");
+    }
+  }, [usuario]);
 
   useEffect(() => {
     // Detectar token en la URL (ej: /reset-password/TOKEN)

@@ -162,6 +162,51 @@ body {
   opacity: 1;
 }
 
+/* Sidebar Nav Grouping Elements */
+.nav-group-header {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.45) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 14px;
+  background: transparent !important;
+  transition: all var(--transition);
+}
+
+.nav-group-header:hover {
+  color: rgba(255,255,255,0.9) !important;
+  background: rgba(255,255,255,0.06) !important;
+}
+
+.nav-submenu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding-left: 0;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-submenu.open {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+.nav-submenu li {
+  padding-left: 32px;
+}
+
 /* ── User section ── */
 .sidebar-user-section {
   padding: 14px 12px 16px;
@@ -1001,20 +1046,24 @@ body {
 }
 
 .close-btn {
-  padding: 8px 16px;
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  color: #475569;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  padding: 8px 18px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
 }
 
 .close-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #94a3b8;
+  background: #fff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 12px rgba(4, 16, 70, 0.08) !important;
+  transform: translateY(-1px) !important;
 }
 
 .details-btn {

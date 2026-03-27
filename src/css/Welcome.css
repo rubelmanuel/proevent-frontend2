@@ -192,19 +192,24 @@ a { text-decoration: none; color: inherit; }
 }
 
 .close-btn {
-  background: rgba(255,255,255,0.12);
-  border: none;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
   color: var(--white);
   font-size: 22px;
   cursor: pointer;
-  width: 34px; height: 34px;
-  border-radius: 8px;
+  width: 36px; height: 36px;
+  border-radius: 10px;
   line-height: 1;
   display: flex; align-items: center; justify-content: center;
-  transition: background var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
 }
 
-.close-btn:hover { background: rgba(255,255,255,0.22); }
+.close-btn:hover { 
+  background: rgba(255,255,255,0.2); 
+  border-color: rgba(255,255,255,0.3);
+  transform: rotate(90deg) scale(1.05); 
+}
 
 .sidebar-menu {
   list-style: none;
@@ -1119,19 +1124,25 @@ a { text-decoration: none; color: inherit; }
 .modal-close {
   position: absolute;
   top: 14px; right: 18px;
-  background: #f3f4f6;
-  border: none;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   font-size: 20px;
-  color: #888;
+  color: #64748b;
   cursor: pointer;
-  width: 32px; height: 32px;
-  border-radius: 8px;
+  width: 34px; height: 34px;
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1;
 }
 
-.modal-close:hover { background: #e5e7eb; color: var(--text); }
+.modal-close:hover { 
+  background: #fff; 
+  color: var(--orange); 
+  border-color: #cbd5e1;
+  transform: rotate(90deg) scale(1.1); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
 
 .modal-icon-header { text-align: center; margin-bottom: 24px; }
 
@@ -1207,6 +1218,66 @@ a { text-decoration: none; color: inherit; }
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(4,16,70,0.35);
 }
+
+/* ──────────────────────────────────────────
+   STATS SECTION
+ ────────────────────────────────────────── */
+.stats-section {
+  padding: 100px 48px;
+  background: var(--white);
+  text-align: center;
+}
+
+.stats-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 30px;
+}
+
+.stat-box {
+  background: var(--bg);
+  padding: 40px 30px;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-box:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--orange);
+}
+
+.stat-box-icon {
+  font-size: 40px;
+  margin-bottom: 20px;
+}
+
+.stat-box-value {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.stat-box-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Colors for stats boxes */
+.stat-box.blue:hover { border-color: var(--blue); }
+.stat-box.orange:hover { border-color: var(--orange); }
+.stat-box.navy:hover { border-color: var(--navy); }
+.stat-box.gold:hover { border-color: var(--gold); }
 
 /* ──────────────────────────────────────────
    RESPONSIVE

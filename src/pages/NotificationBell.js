@@ -64,12 +64,37 @@ export default function NotificationBell({ usuario, onGoToEvaluacion, onGoToVisu
         .then(r => r.json())
         .then(data => {
           const evals = Array.isArray(data) ? data : [];
-          setNotifications(evals.slice(0, 20).map(e => ({
-            id: `eval-${e.id_evaluacion}`,
-            id_evaluacion: e.id_evaluacion,
-            titulo: '📋 Nueva evaluación recibida',
-            cuerpo: `Evento "${e.nombre_evento || `#${e.id_evento}`}" fue evaluado con ${e.satisfaccion}/5 estrellas.`,
-          })));
+          setNotifications(prev => {
+             const existingIds = new Set(prev.map(p => p.id));
+             const eNotifs = evals.slice(0, 20).map(e => ({
+                id: `eval-${e.id_evaluacion}`,
+                id_evaluacion: e.id_evaluacion,
+                titulo: '📋 Nueva evaluación recibida',
+                cuerpo: `Evento "${e.nombre_evento || `#${e.id_evento}`}" fue evaluado con ${e.satisfaccion}/5 estrellas.`,
+             })).filter(n => !existingIds.has(n.id));
+             return [...prev, ...eNotifs];
+          });
+        })
+        .catch(() => {});
+    }
+
+    if (rol === 'Administrador' || rol === 'Administrador V-A-F') {
+      fetch(`${API}/poa`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.movimientos) {
+            const pendientes = data.movimientos.filter(m => m.estado === 'Pendiente');
+            const pNotifs = pendientes.map(m => ({
+              id: `poa-${m.id_movimiento}`,
+              titulo: '💰 Aprobación POA Pendiente',
+              cuerpo: `El evento "#EVT-${m.id_evento}" actualizó su presupuesto por ${m.monto_solicitado_original} ${m.moneda_original || 'DOP'}.`,
+            }));
+            setNotifications(prev => {
+              const existingIds = new Set(prev.map(p => p.id));
+              const additions = pNotifs.filter(n => !existingIds.has(n.id));
+              return [...prev, ...additions];
+            });
+          }
         })
         .catch(() => {});
     }
